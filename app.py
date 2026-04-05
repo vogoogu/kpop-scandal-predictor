@@ -3,10 +3,13 @@ import pandas as pd
 import numpy as np
 import joblib
 import json
-
+import base64
 # ─────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────
+def get_logo_base64(path: str) -> str:
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 st.set_page_config(
     page_title="K-Pop Scandal Impact Predictor",
     page_icon="🎤",
@@ -303,6 +306,30 @@ div[data-testid="stSelectbox"] > div > div {
     width: 60px; height: 3px; background: linear-gradient(90deg, #ff2d7b, #c850ff);
     border-radius: 100px; margin: 0 auto 2rem auto;
 }
+.site-logo-bar {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem 1rem;
+    margin-top: 2rem;
+}
+.site-logo-bar img {
+    height: 36px;
+    width: auto;
+    opacity: 0.5;
+    filter: brightness(0) invert(1);  /* makes any logo white */
+    transition: opacity 0.3s ease;
+}
+.site-logo-bar img:hover {
+    opacity: 0.9;
+}
+def render_logo():
+    logo_b64 = get_logo_base64("logo.png")  # ← change to your actual filename
+    ext = "svg+xml" if "logo.png".endswith(".svg") else "png"
+    st.markdown(
+        f'<div class="site-logo-bar">'
+        f'<img src="data:image/{ext};base64,{logo_b64}" alt="Logo">'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 </style>
 """, unsafe_allow_html=True)
 
@@ -447,6 +474,7 @@ def render_landing():
         unsafe_allow_html=True,
     )
     st.markdown("</div>", unsafe_allow_html=True)
+        render_logo()
 
 
 def render_form():
@@ -531,6 +559,7 @@ def render_form():
         )
 
     st.markdown("<br>", unsafe_allow_html=True)
+    render_logo()
 
     def go_back():
         st.session_state.page = "landing"
@@ -777,7 +806,7 @@ def render_result():
     </svg>"""
 
     st.markdown(f'<div>{svg}</div>', unsafe_allow_html=True)
-
+    render_logo()
     # ── Threshold card ──
     if isinstance(threshold, (int, float)):
         color = "#ff6b9d"
