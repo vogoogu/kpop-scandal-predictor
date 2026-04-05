@@ -28,6 +28,10 @@ def load_config():
     with open("pipeline_config.json") as f:
         return json.load(f)
 
+@st.cache_data
+def load_dataset():
+    return pd.read_csv("kpop_scandals_FINALFINAL.csv")
+
 model_base, model_full = load_models()
 config = load_config()
 
@@ -297,6 +301,100 @@ div[data-testid="stSelectbox"] > div > div {
     margin-top: 0.5rem; font-style: italic;
 }
 
+/* ── ABOUT PAGE ── */
+.about-container { max-width: 850px; margin: 0 auto; padding: 0 1rem; }
+.about-title {
+    font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 2.2rem;
+    text-align: center; margin-bottom: 0.3rem;
+    background: linear-gradient(135deg, #ff6b9d, #c850ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.about-subtitle {
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: #888;
+    text-align: center; letter-spacing: 0.08em; margin-bottom: 2.5rem;
+}
+.about-section-title {
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: #fff; margin: 2.5rem 0 0.4rem 0;
+}
+.about-section-num {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #ff6b9d; margin-bottom: 0.2rem;
+}
+.about-text {
+    font-family: 'Outfit', sans-serif; font-size: 1rem; color: #ccc;
+    line-height: 1.75; margin-bottom: 1.2rem;
+}
+.about-text strong { color: #e0e0e0; }
+.about-text code {
+    font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    background: rgba(255,255,255,0.06); padding: 0.15rem 0.45rem;
+    border-radius: 4px; color: #ff6b9d;
+}
+.about-chart-container {
+    margin: 1.5rem 0; padding: 1.5rem;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+}
+.about-chart-title {
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem;
+    color: #e0e0e0; margin-bottom: 0.3rem;
+}
+.about-chart-caption {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #888;
+    margin-bottom: 1rem;
+}
+.pipeline-step {
+    display: flex; align-items: flex-start; gap: 1rem;
+    margin-bottom: 1.2rem; padding: 1rem 1.2rem;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+}
+.pipeline-step-num {
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem;
+    color: #ff6b9d; min-width: 32px;
+}
+.pipeline-step-content { flex: 1; }
+.pipeline-step-title {
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: #e0e0e0;
+    margin-bottom: 0.2rem;
+}
+.pipeline-step-desc {
+    font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #999; line-height: 1.6;
+}
+.pipeline-step-tool {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #c850ff;
+    margin-top: 0.3rem; display: inline-block;
+    background: rgba(200,80,255,0.08); padding: 0.2rem 0.5rem; border-radius: 4px;
+}
+.limitation-item {
+    padding: 1rem 1.2rem; margin-bottom: 0.8rem;
+    background: rgba(255,59,92,0.04); border-left: 3px solid rgba(255,59,92,0.3);
+    border-radius: 0 10px 10px 0;
+}
+.limitation-title {
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem;
+    color: #e0e0e0; margin-bottom: 0.2rem;
+}
+.limitation-desc {
+    font-family: 'Outfit', sans-serif; font-size: 0.88rem; color: #999; line-height: 1.6;
+}
+.stat-row {
+    display: flex; gap: 1rem; margin: 1.2rem 0; flex-wrap: wrap;
+}
+.stat-box {
+    flex: 1; min-width: 120px; padding: 1rem;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; text-align: center;
+}
+.stat-num {
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.8rem; color: #ff6b9d;
+}
+.stat-label {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #888; margin-top: 0.2rem;
+}
+
 /* ── COMMON ── */
 .model-info-bar {
     max-width: 700px; margin: 2rem auto 0 auto; padding: 1rem 1.5rem;
@@ -460,11 +558,15 @@ def render_landing():
     )
     st.markdown(f'<div class="artist-cloud">{tags}</div>', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col_sp, col3, col4 = st.columns([1, 1.2, 0.3, 1.2, 1])
     with col2:
         def go_to_form():
             st.session_state.page = "form"
         st.button("Start Prediction", type="primary", use_container_width=True, on_click=go_to_form)
+    with col3:
+        def go_to_about():
+            st.session_state.page = "about"
+        st.button("About the Model", type="secondary", use_container_width=True, on_click=go_to_about)
 
     m = config["base_model_metrics"]
     st.markdown(
@@ -877,6 +979,413 @@ def render_result():
     render_logo()
 
 
+def render_about():
+    df = load_dataset()
+    y = (df['label_binary'] == 'high').astype(int)
+    m_base = config["base_model_metrics"]
+    m_full = config["full_model_metrics"]
+
+    st.markdown('<div class="about-container">', unsafe_allow_html=True)
+    st.markdown('<div class="about-title">How It Works</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-subtitle">The data, the model, and the limitations</div>', unsafe_allow_html=True)
+    st.markdown('<div class="styled-divider"></div>', unsafe_allow_html=True)
+
+    def about_go_home():
+        st.session_state.page = "landing"
+    st.button("← Back to Home", type="secondary", on_click=about_go_home)
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 1: THE DATASET
+    # ════════════════════════════════════════════════════════════
+    st.markdown('<div class="about-section-num">01</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-section-title">The Dataset</div>', unsafe_allow_html=True)
+
+    n_total = len(df)
+    n_high = int(y.sum())
+    n_not = n_total - n_high
+    date_min = df['date'].min()[:4]
+    date_max = df['date'].max()[:4]
+    n_artists = df['artist'].nunique()
+
+    st.markdown(
+        f"""<div class="stat-row">
+            <div class="stat-box"><div class="stat-num">{n_total}</div><div class="stat-label">Total Scandals</div></div>
+            <div class="stat-box"><div class="stat-num">{n_artists}</div><div class="stat-label">Unique Artists</div></div>
+            <div class="stat-box"><div class="stat-num">{date_min}–{date_max}</div><div class="stat-label">Time Span</div></div>
+            <div class="stat-box"><div class="stat-num">{n_high} / {n_not}</div><div class="stat-label">High / Manageable</div></div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="about-text">'
+        'Each row represents a single K-pop scandal event — from dating reveals to criminal arrests — '
+        'with 10 features describing the context and a binary label indicating whether the scandal resulted '
+        'in career-altering damage (<strong>High Crisis</strong>) or was recovered from within months '
+        '(<strong>Manageable</strong>). A model that blindly guesses "manageable" every time achieves '
+        f'<strong>{m_base["majority_baseline"]*100:.1f}%</strong> accuracy, so that\'s the bar to beat.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Chart: Scandal type distribution with crisis rate ──
+    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-title">Scandal Types and Their Crisis Rates</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-caption">Bar height = count. Red overlay = proportion that escalated to high crisis.</div>', unsafe_allow_html=True)
+
+    ct = pd.crosstab(df['scandal_type'], df['label_binary'])
+    if 'high' not in ct.columns:
+        ct['high'] = 0
+    if 'not_high' not in ct.columns:
+        ct['not_high'] = 0
+    ct['total'] = ct['high'] + ct['not_high']
+    ct['rate'] = ct['high'] / ct['total']
+    ct = ct.sort_values('total', ascending=False)
+
+    chart_w, chart_h = 700, 240
+    pad_l, pad_r, pad_t, pad_b = 15, 15, 15, 55
+    plot_w = chart_w - pad_l - pad_r
+    plot_h = chart_h - pad_t - pad_b
+    max_count = ct['total'].max()
+    n_bars = len(ct)
+    bar_w = plot_w / n_bars * 0.7
+    gap = plot_w / n_bars
+
+    bars_svg = ""
+    for i, (stype, row) in enumerate(ct.iterrows()):
+        x = pad_l + i * gap + (gap - bar_w) / 2
+        h_total = (row['total'] / max_count) * plot_h
+        h_high = (row['high'] / max_count) * plot_h
+        y_total = pad_t + plot_h - h_total
+        y_high = pad_t + plot_h - h_high
+        rate_pct = row['rate'] * 100
+
+        bars_svg += f'<rect x="{x:.1f}" y="{y_total:.1f}" width="{bar_w:.1f}" height="{h_total:.1f}" rx="4" fill="rgba(200,80,255,0.15)"/>'
+        if h_high > 0:
+            bars_svg += f'<rect x="{x:.1f}" y="{y_high:.1f}" width="{bar_w:.1f}" height="{h_high:.1f}" rx="4" fill="#ff3b5c" opacity="0.7"/>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{y_total - 5:.1f}" text-anchor="middle" fill="#ccc" font-family="Outfit, sans-serif" font-size="11" font-weight="700">{int(row["total"])}</text>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 15:.1f}" text-anchor="middle" fill="#aaa" font-family="Outfit, sans-serif" font-size="10">{stype.title()}</text>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 30:.1f}" text-anchor="middle" fill="#ff6b6b" font-family="Space Mono, monospace" font-size="9">{rate_pct:.0f}% high</text>'
+
+    svg_types = f'<svg viewBox="0 0 {chart_w} {chart_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{bars_svg}</svg>'
+    st.markdown(svg_types, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Chart: Timeline ──
+    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-title">Scandals Over Time</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-caption">Stacked bars — 🔴 high crisis, 🟢 manageable</div>', unsafe_allow_html=True)
+
+    df_plot = df.copy()
+    df_plot['year'] = pd.to_datetime(df_plot['date']).dt.year
+    year_min, year_max = df_plot['year'].min(), df_plot['year'].max()
+    yearly = df_plot.groupby(['year', 'label_binary']).size().unstack(fill_value=0)
+
+    tl_w, tl_h = 700, 180
+    tl_pad_l, tl_pad_r, tl_pad_t, tl_pad_b = 35, 15, 15, 30
+    tl_plot_w = tl_w - tl_pad_l - tl_pad_r
+    tl_plot_h = tl_h - tl_pad_t - tl_pad_b
+    year_range = year_max - year_min if year_max > year_min else 1
+    max_yearly = max(yearly.sum(axis=1).max(), 1)
+
+    tl_svg = ""
+    for yr in range(year_min, year_max + 1):
+        x = tl_pad_l + (yr - year_min) / year_range * tl_plot_w
+        nh = yearly.loc[yr, 'not_high'] if yr in yearly.index and 'not_high' in yearly.columns else 0
+        hh = yearly.loc[yr, 'high'] if yr in yearly.index and 'high' in yearly.columns else 0
+
+        total_h = ((nh + hh) / max_yearly) * tl_plot_h
+        high_h = (hh / max_yearly) * tl_plot_h
+        bar_x = x - 8
+        bw = 16
+
+        if total_h > 0:
+            tl_svg += f'<rect x="{bar_x:.1f}" y="{tl_pad_t + tl_plot_h - total_h:.1f}" width="{bw}" height="{total_h:.1f}" rx="3" fill="rgba(105,240,174,0.25)"/>'
+        if high_h > 0:
+            tl_svg += f'<rect x="{bar_x:.1f}" y="{tl_pad_t + tl_plot_h - high_h:.1f}" width="{bw}" height="{high_h:.1f}" rx="3" fill="rgba(255,59,92,0.5)"/>'
+
+        if yr % 3 == 0 or yr == year_max:
+            tl_svg += f'<text x="{x:.1f}" y="{tl_h - 5}" text-anchor="middle" fill="#888" font-family="Space Mono, monospace" font-size="9">{yr}</text>'
+
+    svg_timeline = f'<svg viewBox="0 0 {tl_w} {tl_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{tl_svg}</svg>'
+    st.markdown(svg_timeline, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 2: DATA COLLECTION PIPELINE
+    # ════════════════════════════════════════════════════════════
+    st.markdown('<div class="about-section-num">02</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-section-title">Data Collection Pipeline</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="about-text">'
+        'The dataset was built through a multi-stage pipeline combining web scraping, API-based enrichment, '
+        'and AI-assisted labeling.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    steps = [
+        ("1", "Scandal Discovery & Scraping",
+         "Web scraper scripts collected scandal events from K-pop news aggregators, fan wikis, and entertainment databases. "
+         "Each event was recorded with the artist, group, date, and a description of what happened.",
+         "Python · BeautifulSoup · Requests"),
+        ("2", "Feature Encoding",
+         "Each scandal was manually and semi-automatically coded with structural features: scandal type (8 categories), "
+         "fandom size (medium/large/mega), agency tier (indie/mid/Big3-4), company response strength, response delay in days, "
+         "whether an apology was issued, international attention, solo vs. group, and prior scandal history.",
+         "Manual review · Domain expertise"),
+        ("3", "Public Reaction Measurement",
+         "Google Trends API was used to measure public reaction intensity. For each scandal, we pulled the artist's "
+         "search volume for a 30-day window before and after the scandal date. The <code>reaction_spike</code> is the "
+         "normalized difference: (after − before) / before. Negative values mean the scandal barely registered against "
+         "the artist's normal search volume.",
+         "Google Trends API · 30-day before/after"),
+        ("4", "AI-Assisted Labeling",
+         "Outcome labels were generated using the Claude API. Each scandal was assessed against documented career outcomes "
+         "(group departures, contract terminations, criminal proceedings, comeback timelines) and classified as "
+         "<strong>High Crisis</strong> or <strong>Manageable</strong>. Every label includes a confidence score (4 or 5) "
+         "and written reasoning. Labels were validated against public record.",
+         "Claude API · Confidence scoring"),
+    ]
+
+    for num, title, desc, tool in steps:
+        st.markdown(
+            f"""<div class="pipeline-step">
+                <div class="pipeline-step-num">{num}</div>
+                <div class="pipeline-step-content">
+                    <div class="pipeline-step-title">{title}</div>
+                    <div class="pipeline-step-desc">{desc}</div>
+                    <div class="pipeline-step-tool">{tool}</div>
+                </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        '<div class="about-text" style="margin-top:0.5rem;">'
+        '<strong>Note on imputation:</strong> For 40 of the 103 entries, the Google Trends API returned insufficient data '
+        'to calculate a reliable spike. These values were imputed from the other 9 features using a regression model. '
+        'This is disclosed throughout the app and acknowledged as a limitation.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 3: THE MODEL
+    # ════════════════════════════════════════════════════════════
+    st.markdown('<div class="about-section-num">03</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-section-title">The Model: Random Forest</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="about-text">'
+        'A Random Forest is an <strong>ensemble</strong> of decision trees. Each tree sees a random subset of '
+        'the training data and a random subset of features, then votes on the outcome. The final prediction is '
+        'the majority vote across all trees. This makes it resistant to overfitting — no single tree dominates, '
+        'and each tree\'s weaknesses are compensated by others.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Visual: How Random Forest works ──
+    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-title">How Random Forest Makes a Decision</div>', unsafe_allow_html=True)
+
+    rf_w, rf_h = 700, 300
+    trees_svg = ""
+
+    trees_svg += '<rect x="10" y="115" width="100" height="70" rx="10" fill="rgba(200,80,255,0.12)" stroke="rgba(200,80,255,0.3)" stroke-width="1.5"/>'
+    trees_svg += '<text x="60" y="145" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">9 Scandal</text>'
+    trees_svg += '<text x="60" y="162" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">Features</text>'
+
+    tree_positions = [(200, 15), (200, 75), (200, 135), (200, 195), (200, 255)]
+    labels = ["Tree 1", "Tree 2", "Tree 3", "...", "Tree 200"]
+    votes = ["High", "Manageable", "High", "High", "Manageable"]
+    vote_colors = ["#ff3b5c", "#69f0ae", "#ff3b5c", "#ff3b5c", "#69f0ae"]
+
+    for i, ((tx, ty), label, vote, vc) in enumerate(zip(tree_positions, labels, votes, vote_colors)):
+        trees_svg += f'<line x1="110" y1="150" x2="{tx}" y2="{ty+25}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
+        trees_svg += f'<rect x="{tx}" y="{ty}" width="115" height="50" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
+
+        if label == "...":
+            trees_svg += f'<text x="{tx+57}" y="{ty+30}" text-anchor="middle" fill="#666" font-family="Outfit, sans-serif" font-size="16" font-weight="700">· · ·</text>'
+        else:
+            trees_svg += f'<circle cx="{tx+20}" cy="{ty+17}" r="5" fill="rgba(255,107,157,0.3)"/>'
+            trees_svg += f'<line x1="{tx+17}" y1="{ty+22}" x2="{tx+13}" y2="{ty+32}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
+            trees_svg += f'<line x1="{tx+23}" y1="{ty+22}" x2="{tx+27}" y2="{ty+32}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
+            trees_svg += f'<circle cx="{tx+13}" cy="{ty+35}" r="3" fill="rgba(255,107,157,0.2)"/>'
+            trees_svg += f'<circle cx="{tx+27}" cy="{ty+35}" r="3" fill="rgba(255,107,157,0.2)"/>'
+            trees_svg += f'<text x="{tx+55}" y="{ty+18}" text-anchor="start" fill="#bbb" font-family="Outfit, sans-serif" font-size="10" font-weight="600">{label}</text>'
+            trees_svg += f'<text x="{tx+55}" y="{ty+38}" text-anchor="start" fill="{vc}" font-family="Space Mono, monospace" font-size="10" font-weight="700">→ {vote}</text>'
+
+        trees_svg += f'<line x1="{tx+115}" y1="{ty+25}" x2="430" y2="150" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
+
+    trees_svg += '<rect x="430" y="105" width="120" height="90" rx="12" fill="rgba(255,107,157,0.08)" stroke="rgba(255,107,157,0.25)" stroke-width="1.5"/>'
+    trees_svg += '<text x="490" y="135" text-anchor="middle" fill="#ff6b9d" font-family="Outfit, sans-serif" font-size="11" font-weight="700">Majority Vote</text>'
+    trees_svg += '<text x="490" y="155" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">3 High</text>'
+    trees_svg += '<text x="490" y="170" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">2 Manageable</text>'
+
+    trees_svg += '<line x1="550" y1="150" x2="590" y2="150" stroke="rgba(255,107,157,0.4)" stroke-width="2"/>'
+    trees_svg += '<polygon points="588,144 600,150 588,156" fill="#ff6b9d"/>'
+
+    trees_svg += '<rect x="600" y="115" width="90" height="70" rx="10" fill="rgba(255,59,92,0.12)" stroke="rgba(255,59,92,0.3)" stroke-width="1.5"/>'
+    trees_svg += '<text x="645" y="147" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="13" font-weight="800">HIGH</text>'
+    trees_svg += '<text x="645" y="165" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="11" font-weight="600">CRISIS</text>'
+
+    svg_rf = f'<svg viewBox="0 0 {rf_w} {rf_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{trees_svg}</svg>'
+    st.markdown(svg_rf, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Key parameters ──
+    st.markdown(
+        '<div class="about-text"><strong>Key model parameters and why they matter:</strong></div>',
+        unsafe_allow_html=True,
+    )
+
+    params = [
+        ("200 trees", "n_estimators=200",
+         "More trees = more stable predictions. 200 gives diminishing returns beyond that — the votes stabilize."),
+        ("Max depth 8", "max_depth=8",
+         "Each tree can make up to 8 sequential decisions. Deep enough to capture interactions "
+         "(e.g., criminal + small agency → high) but shallow enough to not memorize the training data."),
+        ("Balanced class weights", "class_weight='balanced'",
+         "The dataset has 2× more manageable than high crisis cases. Balanced weighting forces the model to "
+         "pay equal attention to both classes, preventing it from just guessing 'manageable' for everything."),
+        ("Min 2 samples per leaf", "min_samples_leaf=2",
+         "A tree branch must have at least 2 training examples to exist. Prevents the model from building rules "
+         "based on a single scandal — that would be memorization, not generalization."),
+    ]
+
+    for title, code, desc in params:
+        st.markdown(
+            f"""<div class="pipeline-step">
+                <div class="pipeline-step-content">
+                    <div class="pipeline-step-title">{title}</div>
+                    <div class="pipeline-step-desc">{desc}</div>
+                    <div class="pipeline-step-tool">{code}</div>
+                </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    # ── Feature importance chart ──
+    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-title">What Drives Predictions? (Feature Importance)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-chart-caption">Base model (9 features). Higher = more influence on the prediction.</div>', unsafe_allow_html=True)
+
+    imps = config["base_feature_importances"]
+    imp_sorted = sorted(imps.items(), key=lambda x: -x[1])[:10]
+    max_imp = imp_sorted[0][1] if imp_sorted else 1
+
+    fi_w, fi_h = 700, 30 * len(imp_sorted) + 20
+    fi_svg = ""
+    for i, (feat, imp) in enumerate(imp_sorted):
+        y_pos = 10 + i * 30
+        bar_width = (imp / max_imp) * 420
+        label = feat.replace("type_", "").replace("_", " ").title()
+        label = label.replace("Fandom Size Num", "Fandom Size").replace("Response Delay Days", "Response Delay")
+        pct = imp * 100
+
+        fi_svg += f'<text x="170" y="{y_pos + 15}" text-anchor="end" fill="#bbb" font-family="Outfit, sans-serif" font-size="11">{label}</text>'
+        fi_svg += f'<rect x="180" y="{y_pos + 3}" width="{bar_width:.1f}" height="18" rx="4" fill="url(#impGrad)" opacity="0.8"/>'
+        fi_svg += f'<text x="{185 + bar_width:.1f}" y="{y_pos + 16}" fill="#ff6b9d" font-family="Space Mono, monospace" font-size="10">{pct:.1f}%</text>'
+
+    fi_svg = f"""<defs><linearGradient id="impGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#c850ff"/><stop offset="100%" stop-color="#ff6b9d"/>
+    </linearGradient></defs>{fi_svg}"""
+
+    svg_fi = f'<svg viewBox="0 0 {fi_w} {fi_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{fi_svg}</svg>'
+    st.markdown(svg_fi, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Performance ──
+    st.markdown(
+        '<div class="about-text"><strong>Model performance:</strong></div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""<div class="stat-row">
+            <div class="stat-box"><div class="stat-num">{m_base['accuracy']*100:.1f}%</div><div class="stat-label">Accuracy (base)</div></div>
+            <div class="stat-box"><div class="stat-num">{m_base['f1_high']:.2f}</div><div class="stat-label">F1 Score (high)</div></div>
+            <div class="stat-box"><div class="stat-num">{m_base['auc']:.2f}</div><div class="stat-label">AUC (base)</div></div>
+            <div class="stat-box"><div class="stat-num">{m_full['auc']:.2f}</div><div class="stat-label">AUC (+ spike)</div></div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        '<div class="about-text">'
+        'The <strong>base model</strong> (9 features, no reaction spike) is used for the main prediction — it only uses '
+        'information available when the scandal breaks. The <strong>full model</strong> (10 features, with reaction spike) '
+        'powers the sensitivity analysis on the results page, answering "what if it goes viral?" '
+        f'Cross-validated F1 stability across 10 random seeds: <strong>{m_base["cv_f1_mean"]:.2f} ± {m_base["cv_f1_std"]:.2f}</strong>.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # ════════════════════════════════════════════════════════════
+    # SECTION 4: LIMITATIONS
+    # ════════════════════════════════════════════════════════════
+    st.markdown('<div class="about-section-num">04</div>', unsafe_allow_html=True)
+    st.markdown('<div class="about-section-title">Acknowledged Limitations</div>', unsafe_allow_html=True)
+
+    limitations = [
+        ("Small sample size",
+         f"The model trains on {n_total} scandals with only {n_high} 'high crisis' cases. "
+         "In 5-fold cross-validation, each test fold contains roughly 7 high-crisis examples. "
+         "A single misclassification swings the fold-level F1 by 10–15 percentage points. "
+         "Performance estimates carry substantial uncertainty."),
+        ("Imputed reaction spike",
+         "40 of 103 reaction_spike values were imputed from other features because the Google Trends API "
+         "returned insufficient data. This is the strongest individual predictor (19% importance in the full model). "
+         "If the imputation process had any indirect correlation with the target, this would inflate performance."),
+        ("Confounded features",
+         "Fandom size and agency tier are highly correlated (r=0.62) — mega fandoms almost exclusively belong to "
+         "Big 3/4 agencies. The model cannot fully disentangle whether outcomes improve because of fan loyalty "
+         "or because powerful agencies have better crisis management infrastructure."),
+        ("Zero-frequency categories",
+         "Two scandal types — behavior (0/11) and political (0/4) — produced zero high-crisis cases in the dataset. "
+         "The model may be overconfident that these categories are always safe. The sample is simply too small to conclude "
+         "that behavior or political scandals never escalate."),
+        ("Temporal leakage risk",
+         "Some features (company_response, response_delay_days) describe how the crisis unfolded rather than just "
+         "the initial conditions. If these were coded with hindsight about whether the response 'worked,' the model "
+         "partially learns from outcomes rather than purely predictive signals."),
+        ("No cultural context modeling",
+         "The model treats all time periods equally. K-pop fan culture and public tolerance have shifted significantly "
+         "over the 2006–2024 window — a dating scandal in 2010 carried very different weight than one in 2023. "
+         "These temporal dynamics are not captured."),
+    ]
+
+    for title, desc in limitations:
+        st.markdown(
+            f"""<div class="limitation-item">
+                <div class="limitation-title">{title}</div>
+                <div class="limitation-desc">{desc}</div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        '<div class="about-text" style="margin-top:1.5rem; text-align: center; color: #888;">'
+        'This is a research prototype built for academic purposes — not a crisis management tool.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        def about_go_predict():
+            st.session_state.page = "form"
+        st.button("Try the Predictor →", type="primary", use_container_width=True, on_click=about_go_predict)
+
+    render_logo()
+
+
 # ─────────────────────────────────────────────────────────────
 # ROUTER
 # ─────────────────────────────────────────────────────────────
@@ -888,3 +1397,5 @@ elif page == "form":
     render_form()
 elif page == "result":
     render_result()
+elif page == "about":
+    render_about()
