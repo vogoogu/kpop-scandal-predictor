@@ -2,7 +2,7 @@
 K-Pop Scandal Impact Predictor
 A machine learning model that predicts whether a breaking K-pop scandal will escalate into a High Crisis (career-altering: group departure, contract termination, criminal charges) or remain Manageable (the idol recovers within weeks to months).
 Live Demo
-👉 Try it on Streamlit Cloud (update link after deployment)
+👉 Try it on Streamlit Cloud https://kpop-scandal-predictor-flabberx.streamlit.app/
 Model
 
 Algorithm: Random Forest (200 trees, balanced class weights)
