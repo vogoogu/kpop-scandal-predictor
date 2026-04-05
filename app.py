@@ -220,6 +220,42 @@ div[data-testid="stSelectbox"] > div > div {
 }
 @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
 @keyframes warningFlash { 0%{opacity:0} 10%{opacity:0.08} 20%{opacity:0} 30%{opacity:0.05} 40%,100%{opacity:0} }
+@keyframes screenShake {
+    0%,100%{transform:translate(0,0)}
+    15%{transform:translate(-5px,-3px)}
+    30%{transform:translate(5px,3px)}
+    45%{transform:translate(-4px,4px)}
+    60%{transform:translate(4px,-4px)}
+    75%{transform:translate(-3px,3px)}
+    90%{transform:translate(3px,-3px)}
+}
+@keyframes glitch1 {
+    0%,100%{clip-path:inset(0 0 92% 0);transform:translate(-3px,0)}
+    50%{clip-path:inset(0 0 82% 0);transform:translate(3px,0)}
+}
+@keyframes glitch2 {
+    0%,100%{clip-path:inset(55% 0 25% 0);transform:translate(3px,0)}
+    50%{clip-path:inset(65% 0 15% 0);transform:translate(-3px,0)}
+}
+.glitch-text { position: relative; display: inline-block; }
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text); position: absolute;
+    top: 0; left: 0; width: 100%; background: #0a0a0f;
+    font-weight: 900;
+}
+.glitch-text::before { color: #ff0055; animation: glitch1 0.45s infinite; }
+.glitch-text::after  { color: #00ffff; animation: glitch2 0.45s infinite; }
+.shake-wrapper { animation: screenShake 0.6s ease-out; }
+.danger-particle {
+    position: fixed; top: -30px;
+    pointer-events: none; z-index: 9998; font-size: 1.4rem;
+    animation: dangerFall linear forwards;
+}
+@keyframes dangerFall {
+    0%  { transform: translateY(0)     rotate(0deg)   scale(1);   opacity: 1; }
+    80% { opacity: 0.7; }
+    100%{ transform: translateY(105vh) rotate(400deg) scale(0.4); opacity: 0; }
+}
 .warning-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ff3b5c;
     pointer-events: none; z-index: 9999; animation: warningFlash 2s ease-out forwards;
@@ -531,18 +567,29 @@ def render_result():
     base_prob = r["base_prob"]
     is_high = r["base_pred"] == "high"
 
-    # ── Animation overlays ──
+# ── Animation overlays ──
     if is_high:
         st.markdown('<div class="warning-overlay"></div>', unsafe_allow_html=True)
+        symbols = ["⚠️", "💀", "🚨", "❌", "⛔"]
+        particles = "".join(
+            f'<div class="danger-particle" style="'
+            f'left:{np.random.randint(0,100)}%;'
+            f'animation-delay:{np.random.uniform(0,2.5):.2f}s;'
+            f'animation-duration:{np.random.uniform(3,5.5):.2f}s;">'
+            f'{symbols[i % len(symbols)]}</div>'
+            for i in range(45)
+        )
+        st.markdown(f'<div class="confetti-container">{particles}</div>', unsafe_allow_html=True)
     else:
         colors = ["#00e676", "#69f0ae", "#b9f6ca", "#ff6b9d", "#c850ff", "#7b61ff", "#fff176", "#ffd54f"]
+        shapes = ["border-radius:50%", "border-radius:2px", "border-radius:0", "transform:rotate(45deg)"]
         pieces = "".join(
             f'<div class="confetti-piece" style="left:{np.random.randint(0,100)}%;'
-            f'width:{np.random.randint(6,12)}px;height:{np.random.randint(6,12)}px;'
-            f'background:{colors[i%len(colors)]};'
+            f'width:{np.random.randint(7,14)}px;height:{np.random.randint(7,14)}px;'
+            f'background:{colors[i%len(colors)]};{shapes[i%len(shapes)]};'
             f'animation-delay:{np.random.uniform(0,2):.1f}s;'
             f'animation-duration:{np.random.uniform(2,4.5):.1f}s;"></div>'
-            for i in range(60)
+            for i in range(80)
         )
         st.markdown(f'<div class="confetti-container">{pieces}</div>', unsafe_allow_html=True)
 
