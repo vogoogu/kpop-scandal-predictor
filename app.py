@@ -4,12 +4,14 @@ import numpy as np
 import joblib
 import json
 import base64
+
 # ─────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────
 def get_logo_base64(path: str) -> str:
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
 st.set_page_config(
     page_title="K-Pop Scandal Impact Predictor",
     page_icon="🎤",
@@ -306,6 +308,8 @@ div[data-testid="stSelectbox"] > div > div {
     width: 60px; height: 3px; background: linear-gradient(90deg, #ff2d7b, #c850ff);
     border-radius: 100px; margin: 0 auto 2rem auto;
 }
+
+/* ── LOGO ── */
 .site-logo-bar {
     text-align: center;
     padding: 2.5rem 1rem 1.5rem 1rem;
@@ -315,12 +319,19 @@ div[data-testid="stSelectbox"] > div > div {
     height: 36px;
     width: auto;
     opacity: 0.5;
-    filter: brightness(0) invert(1);  /* makes any logo white */
+    filter: brightness(0) invert(1);
     transition: opacity 0.3s ease;
 }
 .site-logo-bar img:hover {
     opacity: 0.9;
 }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────
+# LOGO HELPER
+# ─────────────────────────────────────────────────────────────
 def render_logo():
     logo_b64 = get_logo_base64("logo.png")  # ← change to your actual filename
     ext = "svg+xml" if "logo.png".endswith(".svg") else "png"
@@ -330,8 +341,6 @@ def render_logo():
         f'</div>',
         unsafe_allow_html=True
     )
-</style>
-""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -347,7 +356,6 @@ if "prediction" not in st.session_state:
 # PREDICTION LOGIC
 # ─────────────────────────────────────────────────────────────
 def build_base_vector(inputs: dict) -> pd.DataFrame:
-    """Build feature vector for the 9-feature base model."""
     feature_names = config["base_feature_columns"]
     row = pd.DataFrame([inputs])
     row_encoded = pd.get_dummies(row, columns=["scandal_type"], prefix="type")
@@ -358,7 +366,6 @@ def build_base_vector(inputs: dict) -> pd.DataFrame:
 
 
 def build_full_vector(inputs: dict, spike: float) -> pd.DataFrame:
-    """Build feature vector for the 10-feature full model."""
     feature_names = config["full_feature_columns"]
     full_inputs = {**inputs, "reaction_spike": spike}
     row = pd.DataFrame([full_inputs])
@@ -370,13 +377,11 @@ def build_full_vector(inputs: dict, spike: float) -> pd.DataFrame:
 
 
 def predict_crisis(inputs: dict) -> dict:
-    # ── Base prediction (9 features) ──
     X_base = build_base_vector(inputs)
     base_prob = model_base.predict_proba(X_base)[0][1]
     base_pred = "high" if base_prob > 0.5 else "manageable"
 
-    # ── Sensitivity sweep (full model, varying reaction_spike) ──
-    spike_range = np.linspace(-6, 14, 81)  # 81 points for smooth curve
+    spike_range = np.linspace(-6, 14, 81)
     spike_probs = []
     for s in spike_range:
         X_full = build_full_vector(inputs, s)
@@ -384,23 +389,19 @@ def predict_crisis(inputs: dict) -> dict:
         spike_probs.append(p)
     spike_probs = np.array(spike_probs)
 
-    # ── Find critical threshold (where P(high) crosses 0.5) ──
     threshold = None
     for i in range(len(spike_probs) - 1):
         if spike_probs[i] < 0.5 <= spike_probs[i + 1]:
-            # Linear interpolation
             frac = (0.5 - spike_probs[i]) / (spike_probs[i + 1] - spike_probs[i])
             threshold = spike_range[i] + frac * (spike_range[i + 1] - spike_range[i])
             break
 
-    # If always above or below 0.5
     if threshold is None:
         if spike_probs[0] >= 0.5:
             threshold = "always_high"
         else:
             threshold = "always_manageable"
 
-    # ── Key factors for the base prediction ──
     importances = config["base_feature_importances"]
     top_features = sorted(importances.items(), key=lambda x: -x[1])[:5]
     factors = []
@@ -474,7 +475,7 @@ def render_landing():
         unsafe_allow_html=True,
     )
     st.markdown("</div>", unsafe_allow_html=True)
-        render_logo()
+    render_logo()
 
 
 def render_form():
@@ -559,7 +560,6 @@ def render_form():
         )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    render_logo()
 
     def go_back():
         st.session_state.page = "landing"
@@ -585,6 +585,8 @@ def render_form():
     with col_b3:
         st.button("Predict Outcome →", type="primary", use_container_width=True, on_click=run_prediction)
 
+    render_logo()
+
 
 def render_result():
     r = st.session_state.prediction
@@ -596,7 +598,7 @@ def render_result():
     base_prob = r["base_prob"]
     is_high = r["base_pred"] == "high"
 
-# ── Animation overlays ──
+    # ── Animation overlays ──
     if is_high:
         st.markdown('<div class="warning-overlay"></div>', unsafe_allow_html=True)
         symbols = ["⚠️", "💀", "❌"]
@@ -627,7 +629,12 @@ def render_result():
 
     if is_high:
         st.markdown('<div class="result-icon-circle icon-high">⚠️</div>', unsafe_allow_html=True)
-        st.markdown('<div class="result-verdict verdict-high">HIGH CRISIS</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="shake-wrapper">'
+            '<div class="result-verdict verdict-high glitch-text" data-text="HIGH CRISIS">HIGH CRISIS</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         st.markdown(
             '<div class="result-subtitle">Career-altering damage likely — group departure, termination, or criminal charges</div>',
             unsafe_allow_html=True,
@@ -718,20 +725,16 @@ def render_result():
     def to_y(val):
         return pad_t + (1.0 - val) * plot_h
 
-    # Build path
     points = " ".join(f"{to_x(spike_range[i]):.1f},{to_y(spike_probs[i]):.1f}" for i in range(len(spike_range)))
 
-    # Gradient fill under curve
     fill_points = (
         f"{to_x(spike_range[0]):.1f},{to_y(0):.1f} "
         + points
         + f" {to_x(spike_range[-1]):.1f},{to_y(0):.1f}"
     )
 
-    # 50% threshold line y position
     y50 = to_y(0.5)
 
-    # Threshold marker
     threshold_marker = ""
     threshold_text_svg = ""
     if isinstance(threshold, (int, float)):
@@ -747,7 +750,6 @@ def render_result():
             f'Spike = {threshold:.1f}</text>'
         )
 
-    # Y-axis labels
     y_labels = ""
     for pct in [0, 25, 50, 75, 100]:
         yy = to_y(pct / 100)
@@ -758,7 +760,6 @@ def render_result():
             f'stroke="rgba(255,255,255,0.06)" stroke-width="1"/>'
         )
 
-    # X-axis labels
     x_labels = ""
     for xv in [-4, -2, 0, 2, 4, 6, 8, 10, 12]:
         xx = to_x(xv)
@@ -767,7 +768,6 @@ def render_result():
             f'font-family="Space Mono, monospace" font-size="10">{xv:+d}</text>'
         )
 
-    # X-axis title
     x_title = (
         f'<text x="{pad_l + plot_w / 2}" y="{chart_h - 2}" text-anchor="middle" fill="#888" '
         f'font-family="Space Mono, monospace" font-size="10">Reaction Spike (Google Trends)</text>'
@@ -790,23 +790,19 @@ def render_result():
         {y_labels}
         {x_labels}
         {x_title}
-        <!-- 50% line -->
         <line x1="{pad_l}" y1="{y50:.1f}" x2="{pad_l + plot_w}" y2="{y50:.1f}"
             stroke="#ff6b9d" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
         <text x="{pad_l + plot_w + 4}" y="{y50 + 3}" fill="#ff6b9d" opacity="0.6"
             font-family="Space Mono, monospace" font-size="9">50%</text>
-        <!-- Fill under curve -->
         <polygon points="{fill_points}" fill="url(#fillGrad)"/>
-        <!-- Curve -->
         <polyline points="{points}" fill="none" stroke="url(#curveGrad)" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- Threshold marker -->
         {threshold_marker}
         {threshold_text_svg}
     </svg>"""
 
     st.markdown(f'<div>{svg}</div>', unsafe_allow_html=True)
-    render_logo()
+
     # ── Threshold card ──
     if isinstance(threshold, (int, float)):
         color = "#ff6b9d"
@@ -878,6 +874,7 @@ def render_result():
         </div>""",
         unsafe_allow_html=True,
     )
+    render_logo()
 
 
 # ─────────────────────────────────────────────────────────────
