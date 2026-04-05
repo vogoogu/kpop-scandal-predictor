@@ -1,0 +1,122 @@
+{
+  "feature_columns": [
+    "fandom_size_num",
+    "agency_tier",
+    "company_response",
+    "response_delay_days",
+    "apology",
+    "international",
+    "is_solo",
+    "prior_scandal",
+    "reaction_spike",
+    "type_behavior",
+    "type_bullying",
+    "type_contract",
+    "type_controversy",
+    "type_criminal",
+    "type_dating",
+    "type_drugs",
+    "type_political"
+  ],
+  "scandal_types": [
+    "behavior",
+    "bullying",
+    "contract",
+    "controversy",
+    "criminal",
+    "dating",
+    "drugs",
+    "political"
+  ],
+  "feature_importances": {
+    "fandom_size_num": 0.1540115042690214,
+    "agency_tier": 0.06100880262983449,
+    "company_response": 0.08959820643346149,
+    "response_delay_days": 0.12099620913178662,
+    "apology": 0.032746489795165916,
+    "international": 0.025110981590695865,
+    "is_solo": 0.018660553489487527,
+    "prior_scandal": 0.026854677598131836,
+    "reaction_spike": 0.1900238454163988,
+    "type_behavior": 0.039539269407301764,
+    "type_bullying": 0.01690680786494776,
+    "type_contract": 0.03107139225460563,
+    "type_controversy": 0.048110692516407295,
+    "type_criminal": 0.09272409168679227,
+    "type_dating": 0.0247122746775308,
+    "type_drugs": 0.021746592206318006,
+    "type_political": 0.0061776090321125745
+  },
+  "model_metrics": {
+    "accuracy": 0.835,
+    "f1_high": 0.746,
+    "auc": 0.87,
+    "majority_baseline": 0.66,
+    "n_samples": 103,
+    "n_high": 35,
+    "n_not_high": 68,
+    "cv_f1_mean": 0.701,
+    "cv_f1_std": 0.031
+  },
+  "input_ranges": {
+    "fandom_size_num": {
+      "min": 2,
+      "max": 4,
+      "labels": {
+        "2": "Medium",
+        "3": "Large",
+        "4": "Mega"
+      }
+    },
+    "agency_tier": {
+      "min": 1,
+      "max": 3,
+      "labels": {
+        "1": "Small/Indie",
+        "2": "Mid-tier",
+        "3": "Big3/Big4 (SM, YG, JYP, HYBE)"
+      }
+    },
+    "company_response": {
+      "min": 0,
+      "max": 2,
+      "labels": {
+        "0": "Silence",
+        "1": "Partial/vague",
+        "2": "Strong defense"
+      }
+    },
+    "response_delay_days": {
+      "min": 0,
+      "max": 30
+    },
+    "apology": {
+      "options": [
+        0,
+        1
+      ]
+    },
+    "international": {
+      "options": [
+        0,
+        1
+      ]
+    },
+    "is_solo": {
+      "options": [
+        0,
+        1
+      ]
+    },
+    "prior_scandal": {
+      "options": [
+        0,
+        1
+      ]
+    },
+    "reaction_spike": {
+      "min": -6.0,
+      "max": 14.0
+    }
+  }
+}
