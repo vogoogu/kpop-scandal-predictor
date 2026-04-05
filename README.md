@@ -19,18 +19,3 @@ Small dataset (103 cases, 35 "high crisis") — performance estimates have high 
 fandom_size and agency_tier are highly correlated (r=0.62) — the model can't fully disentangle them
 Two scandal types (behavior, political) had zero "high" cases in training — the model may be overconfident about these
 This is a research prototype, not a crisis management tool
-
-Run Locally
-bashpip install -r requirements.txt
-python train_model.py          # retrain the model (optional)
-streamlit run app.py           # launch the app
-Deploy to Streamlit Cloud
-
-Push this repo to GitHub
-Go to share.streamlit.io
-Connect your GitHub repo
-Set main file path to app.py
-Deploy — you'll get a public URL
-
-Files
-FilePurposeapp.pyStreamlit app (landing page, form, results)train_model.pyModel training + evaluation scriptmodel_base.joblibSerialized trained modelpipeline_config.jsonFeature names, input ranges, metricskpop_scandals_FINALFINAL.csvThe 103-row datasetrequirements.txtPython dependencies.streamlit/config.tomlDark theme config
