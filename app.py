@@ -729,7 +729,7 @@ def render_result():
         {threshold_text_svg}
     </svg>"""
 
-    st.markdown(svg, unsafe_allow_html=True)
+    st.markdown(f'<div>{svg}</div>', unsafe_allow_html=True)
 
     # ── Threshold card ──
     if isinstance(threshold, (int, float)):
