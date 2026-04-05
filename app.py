@@ -799,7 +799,6 @@ def render_result():
         ⚠️ Research prototype — not a crisis management tool.<br>
         Base model (9 features): {m_base['n_samples']} cases · F1={m_base['f1_high']:.2f} · AUC={m_base['auc']:.2f}<br>
         Full model (+ reaction spike): F1={m_full['f1_high']:.2f} · AUC={m_full['auc']:.2f}<br>
-        40% of reaction_spike values were imputed. See documentation for full limitations.
         </div>""",
         unsafe_allow_html=True,
     )
