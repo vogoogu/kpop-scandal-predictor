@@ -1029,10 +1029,6 @@ def render_about():
     )
 
     # ── Chart: Scandal type distribution with crisis rate ──
-    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-title">Scandal Types and Their Crisis Rates</div>', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-caption">Bar height = count. Red overlay = proportion that escalated to high crisis.</div>', unsafe_allow_html=True)
-
     ct = pd.crosstab(df['scandal_type'], df['label_binary'])
     if 'high' not in ct.columns:
         ct['high'] = 0
@@ -1042,14 +1038,14 @@ def render_about():
     ct['rate'] = ct['high'] / ct['total']
     ct = ct.sort_values('total', ascending=False)
 
-    chart_w, chart_h = 700, 240
-    pad_l, pad_r, pad_t, pad_b = 15, 15, 15, 55
+    chart_w, chart_h = 700, 250
+    pad_l, pad_r, pad_t, pad_b = 15, 15, 20, 58
     plot_w = chart_w - pad_l - pad_r
     plot_h = chart_h - pad_t - pad_b
     max_count = ct['total'].max()
     n_bars = len(ct)
-    bar_w = plot_w / n_bars * 0.7
     gap = plot_w / n_bars
+    bar_w = gap * 0.65
 
     bars_svg = ""
     for i, (stype, row) in enumerate(ct.iterrows()):
@@ -1063,26 +1059,27 @@ def render_about():
         bars_svg += f'<rect x="{x:.1f}" y="{y_total:.1f}" width="{bar_w:.1f}" height="{h_total:.1f}" rx="4" fill="rgba(200,80,255,0.15)"/>'
         if h_high > 0:
             bars_svg += f'<rect x="{x:.1f}" y="{y_high:.1f}" width="{bar_w:.1f}" height="{h_high:.1f}" rx="4" fill="#ff3b5c" opacity="0.7"/>'
-        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{y_total - 5:.1f}" text-anchor="middle" fill="#ccc" font-family="Outfit, sans-serif" font-size="11" font-weight="700">{int(row["total"])}</text>'
-        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 15:.1f}" text-anchor="middle" fill="#aaa" font-family="Outfit, sans-serif" font-size="10">{stype.title()}</text>'
-        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 30:.1f}" text-anchor="middle" fill="#ff6b6b" font-family="Space Mono, monospace" font-size="9">{rate_pct:.0f}% high</text>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{y_total - 6:.1f}" text-anchor="middle" fill="#ccc" font-family="Outfit, sans-serif" font-size="12" font-weight="700">{int(row["total"])}</text>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 16:.1f}" text-anchor="middle" fill="#aaa" font-family="Outfit, sans-serif" font-size="10">{stype.title()}</text>'
+        bars_svg += f'<text x="{x + bar_w/2:.1f}" y="{pad_t + plot_h + 32:.1f}" text-anchor="middle" fill="#ff6b6b" font-family="Space Mono, monospace" font-size="9">{rate_pct:.0f}% crisis</text>'
 
-    svg_types = f'<svg viewBox="0 0 {chart_w} {chart_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{bars_svg}</svg>'
-    st.markdown(svg_types, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    chart1_html = (
+        '<div class="about-chart-container">'
+        '<div class="about-chart-title">Scandal Types and Their Crisis Rates</div>'
+        '<div class="about-chart-caption">Bar height = total count. Red overlay = proportion that escalated to high crisis.</div>'
+        f'<svg viewBox="0 0 {chart_w} {chart_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{bars_svg}</svg>'
+        '</div>'
+    )
+    st.markdown(chart1_html, unsafe_allow_html=True)
 
     # ── Chart: Timeline ──
-    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-title">Scandals Over Time</div>', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-caption">Stacked bars — 🔴 high crisis, 🟢 manageable</div>', unsafe_allow_html=True)
-
     df_plot = df.copy()
     df_plot['year'] = pd.to_datetime(df_plot['date']).dt.year
     year_min, year_max = df_plot['year'].min(), df_plot['year'].max()
     yearly = df_plot.groupby(['year', 'label_binary']).size().unstack(fill_value=0)
 
-    tl_w, tl_h = 700, 180
-    tl_pad_l, tl_pad_r, tl_pad_t, tl_pad_b = 35, 15, 15, 30
+    tl_w, tl_h = 700, 190
+    tl_pad_l, tl_pad_r, tl_pad_t, tl_pad_b = 35, 15, 15, 32
     tl_plot_w = tl_w - tl_pad_l - tl_pad_r
     tl_plot_h = tl_h - tl_pad_t - tl_pad_b
     year_range = year_max - year_min if year_max > year_min else 1
@@ -1107,9 +1104,14 @@ def render_about():
         if yr % 3 == 0 or yr == year_max:
             tl_svg += f'<text x="{x:.1f}" y="{tl_h - 5}" text-anchor="middle" fill="#888" font-family="Space Mono, monospace" font-size="9">{yr}</text>'
 
-    svg_timeline = f'<svg viewBox="0 0 {tl_w} {tl_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{tl_svg}</svg>'
-    st.markdown(svg_timeline, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    chart2_html = (
+        '<div class="about-chart-container">'
+        '<div class="about-chart-title">Scandals Over Time</div>'
+        '<div class="about-chart-caption">Stacked bars per year — red = high crisis, green = manageable</div>'
+        f'<svg viewBox="0 0 {tl_w} {tl_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{tl_svg}</svg>'
+        '</div>'
+    )
+    st.markdown(chart2_html, unsafe_allow_html=True)
 
     # ════════════════════════════════════════════════════════════
     # SECTION 2: DATA COLLECTION PIPELINE
@@ -1162,7 +1164,6 @@ def render_about():
             unsafe_allow_html=True,
         )
 
-
     # ════════════════════════════════════════════════════════════
     # SECTION 3: THE MODEL
     # ════════════════════════════════════════════════════════════
@@ -1179,54 +1180,68 @@ def render_about():
         unsafe_allow_html=True,
     )
 
-    # ── Visual: How Random Forest works ──
-    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-title">How Random Forest Makes a Decision</div>', unsafe_allow_html=True)
+    # ── Visual: How Random Forest works (wider, shorter labels) ──
+    rf_w, rf_h = 780, 280
+    ts = ""
 
-    rf_w, rf_h = 700, 300
-    trees_svg = ""
+    # Input box
+    ts += '<rect x="5" y="110" width="90" height="60" rx="10" fill="rgba(200,80,255,0.12)" stroke="rgba(200,80,255,0.3)" stroke-width="1.5"/>'
+    ts += '<text x="50" y="137" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">9 Input</text>'
+    ts += '<text x="50" y="153" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">Features</text>'
 
-    trees_svg += '<rect x="10" y="115" width="100" height="70" rx="10" fill="rgba(200,80,255,0.12)" stroke="rgba(200,80,255,0.3)" stroke-width="1.5"/>'
-    trees_svg += '<text x="60" y="145" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">9 Scandal</text>'
-    trees_svg += '<text x="60" y="162" text-anchor="middle" fill="#c850ff" font-family="Outfit, sans-serif" font-size="11" font-weight="700">Features</text>'
+    tree_data = [
+        (15,  "Tree 1",   "High",       "#ff3b5c"),
+        (70,  "Tree 2",   "Manageable", "#69f0ae"),
+        (125, "Tree 3",   "High",       "#ff3b5c"),
+        (180, "...",       "",           ""),
+        (235, "Tree 200",  "Manageable", "#69f0ae"),
+    ]
 
-    tree_positions = [(200, 15), (200, 75), (200, 135), (200, 195), (200, 255)]
-    labels = ["Tree 1", "Tree 2", "Tree 3", "...", "Tree 200"]
-    votes = ["High", "Manageable", "High", "High", "Manageable"]
-    vote_colors = ["#ff3b5c", "#69f0ae", "#ff3b5c", "#ff3b5c", "#69f0ae"]
-
-    for i, ((tx, ty), label, vote, vc) in enumerate(zip(tree_positions, labels, votes, vote_colors)):
-        trees_svg += f'<line x1="110" y1="150" x2="{tx}" y2="{ty+25}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
-        trees_svg += f'<rect x="{tx}" y="{ty}" width="115" height="50" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
+    for ty, label, vote, vc in tree_data:
+        tx = 170
+        # Line from input to tree
+        ts += f'<line x1="95" y1="140" x2="{tx}" y2="{ty+22}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>'
+        # Tree box
+        ts += f'<rect x="{tx}" y="{ty}" width="130" height="44" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>'
 
         if label == "...":
-            trees_svg += f'<text x="{tx+57}" y="{ty+30}" text-anchor="middle" fill="#666" font-family="Outfit, sans-serif" font-size="16" font-weight="700">· · ·</text>'
+            ts += f'<text x="{tx+65}" y="{ty+27}" text-anchor="middle" fill="#666" font-family="Outfit, sans-serif" font-size="18" font-weight="700">· · ·</text>'
         else:
-            trees_svg += f'<circle cx="{tx+20}" cy="{ty+17}" r="5" fill="rgba(255,107,157,0.3)"/>'
-            trees_svg += f'<line x1="{tx+17}" y1="{ty+22}" x2="{tx+13}" y2="{ty+32}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
-            trees_svg += f'<line x1="{tx+23}" y1="{ty+22}" x2="{tx+27}" y2="{ty+32}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
-            trees_svg += f'<circle cx="{tx+13}" cy="{ty+35}" r="3" fill="rgba(255,107,157,0.2)"/>'
-            trees_svg += f'<circle cx="{tx+27}" cy="{ty+35}" r="3" fill="rgba(255,107,157,0.2)"/>'
-            trees_svg += f'<text x="{tx+55}" y="{ty+18}" text-anchor="start" fill="#bbb" font-family="Outfit, sans-serif" font-size="10" font-weight="600">{label}</text>'
-            trees_svg += f'<text x="{tx+55}" y="{ty+38}" text-anchor="start" fill="{vc}" font-family="Space Mono, monospace" font-size="10" font-weight="700">→ {vote}</text>'
+            # Mini tree icon
+            ts += f'<circle cx="{tx+18}" cy="{ty+15}" r="4" fill="rgba(255,107,157,0.35)"/>'
+            ts += f'<line x1="{tx+15}" y1="{ty+19}" x2="{tx+12}" y2="{ty+28}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
+            ts += f'<line x1="{tx+21}" y1="{ty+19}" x2="{tx+24}" y2="{ty+28}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>'
+            ts += f'<circle cx="{tx+12}" cy="{ty+31}" r="3" fill="rgba(255,107,157,0.2)"/>'
+            ts += f'<circle cx="{tx+24}" cy="{ty+31}" r="3" fill="rgba(255,107,157,0.2)"/>'
+            # Label + vote
+            ts += f'<text x="{tx+42}" y="{ty+16}" fill="#bbb" font-family="Outfit, sans-serif" font-size="11" font-weight="600">{label}</text>'
+            ts += f'<text x="{tx+42}" y="{ty+34}" fill="{vc}" font-family="Space Mono, monospace" font-size="10" font-weight="700">→ {vote}</text>'
 
-        trees_svg += f'<line x1="{tx+115}" y1="{ty+25}" x2="430" y2="150" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>'
+        # Line to vote box
+        ts += f'<line x1="{tx+130}" y1="{ty+22}" x2="420" y2="140" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>'
 
-    trees_svg += '<rect x="430" y="105" width="120" height="90" rx="12" fill="rgba(255,107,157,0.08)" stroke="rgba(255,107,157,0.25)" stroke-width="1.5"/>'
-    trees_svg += '<text x="490" y="135" text-anchor="middle" fill="#ff6b9d" font-family="Outfit, sans-serif" font-size="11" font-weight="700">Majority Vote</text>'
-    trees_svg += '<text x="490" y="155" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">3 High</text>'
-    trees_svg += '<text x="490" y="170" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">2 Manageable</text>'
+    # Majority vote box
+    ts += '<rect x="420" y="100" width="140" height="80" rx="12" fill="rgba(255,107,157,0.08)" stroke="rgba(255,107,157,0.25)" stroke-width="1.5"/>'
+    ts += '<text x="490" y="127" text-anchor="middle" fill="#ff6b9d" font-family="Outfit, sans-serif" font-size="12" font-weight="700">Majority Vote</text>'
+    ts += '<text x="490" y="148" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">3 × High</text>'
+    ts += '<text x="490" y="165" text-anchor="middle" fill="#aaa" font-family="Space Mono, monospace" font-size="10">2 × Manageable</text>'
 
-    trees_svg += '<line x1="550" y1="150" x2="590" y2="150" stroke="rgba(255,107,157,0.4)" stroke-width="2"/>'
-    trees_svg += '<polygon points="588,144 600,150 588,156" fill="#ff6b9d"/>'
+    # Arrow
+    ts += '<line x1="560" y1="140" x2="610" y2="140" stroke="rgba(255,107,157,0.4)" stroke-width="2"/>'
+    ts += '<polygon points="608,134 620,140 608,146" fill="#ff6b9d"/>'
 
-    trees_svg += '<rect x="600" y="115" width="90" height="70" rx="10" fill="rgba(255,59,92,0.12)" stroke="rgba(255,59,92,0.3)" stroke-width="1.5"/>'
-    trees_svg += '<text x="645" y="147" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="13" font-weight="800">HIGH</text>'
-    trees_svg += '<text x="645" y="165" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="11" font-weight="600">CRISIS</text>'
+    # Output box
+    ts += '<rect x="625" y="108" width="100" height="64" rx="10" fill="rgba(255,59,92,0.12)" stroke="rgba(255,59,92,0.3)" stroke-width="1.5"/>'
+    ts += '<text x="675" y="137" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="14" font-weight="800">HIGH</text>'
+    ts += '<text x="675" y="155" text-anchor="middle" fill="#ff3b5c" font-family="Outfit, sans-serif" font-size="11" font-weight="600">CRISIS</text>'
 
-    svg_rf = f'<svg viewBox="0 0 {rf_w} {rf_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{trees_svg}</svg>'
-    st.markdown(svg_rf, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    rf_chart_html = (
+        '<div class="about-chart-container">'
+        '<div class="about-chart-title">How Random Forest Makes a Decision</div>'
+        f'<svg viewBox="0 0 {rf_w} {rf_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{ts}</svg>'
+        '</div>'
+    )
+    st.markdown(rf_chart_html, unsafe_allow_html=True)
 
     # ── Key parameters ──
     st.markdown(
@@ -1248,32 +1263,31 @@ def render_about():
          "based on a single scandal — that would be memorization, not generalization."),
     ]
 
-    for title, code, desc in params:
+    for title, code_str, desc in params:
         st.markdown(
             f"""<div class="pipeline-step">
                 <div class="pipeline-step-content">
                     <div class="pipeline-step-title">{title}</div>
                     <div class="pipeline-step-desc">{desc}</div>
-                    <div class="pipeline-step-tool">{code}</div>
+                    <div class="pipeline-step-tool">{code_str}</div>
                 </div>
             </div>""",
             unsafe_allow_html=True,
         )
 
     # ── Feature importance chart ──
-    st.markdown('<div class="about-chart-container">', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-title">What Drives Predictions? (Feature Importance)</div>', unsafe_allow_html=True)
-    st.markdown('<div class="about-chart-caption">Base model (9 features). Higher = more influence on the prediction.</div>', unsafe_allow_html=True)
-
     imps = config["base_feature_importances"]
     imp_sorted = sorted(imps.items(), key=lambda x: -x[1])[:10]
     max_imp = imp_sorted[0][1] if imp_sorted else 1
 
     fi_w, fi_h = 700, 30 * len(imp_sorted) + 20
-    fi_svg = ""
+    fi_svg = '<defs><linearGradient id="impGrad" x1="0" y1="0" x2="1" y2="0">'
+    fi_svg += '<stop offset="0%" stop-color="#c850ff"/><stop offset="100%" stop-color="#ff6b9d"/>'
+    fi_svg += '</linearGradient></defs>'
+
     for i, (feat, imp) in enumerate(imp_sorted):
         y_pos = 10 + i * 30
-        bar_width = (imp / max_imp) * 420
+        bar_width = (imp / max_imp) * 400
         label = feat.replace("type_", "").replace("_", " ").title()
         label = label.replace("Fandom Size Num", "Fandom Size").replace("Response Delay Days", "Response Delay")
         pct = imp * 100
@@ -1282,13 +1296,14 @@ def render_about():
         fi_svg += f'<rect x="180" y="{y_pos + 3}" width="{bar_width:.1f}" height="18" rx="4" fill="url(#impGrad)" opacity="0.8"/>'
         fi_svg += f'<text x="{185 + bar_width:.1f}" y="{y_pos + 16}" fill="#ff6b9d" font-family="Space Mono, monospace" font-size="10">{pct:.1f}%</text>'
 
-    fi_svg = f"""<defs><linearGradient id="impGrad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#c850ff"/><stop offset="100%" stop-color="#ff6b9d"/>
-    </linearGradient></defs>{fi_svg}"""
-
-    svg_fi = f'<svg viewBox="0 0 {fi_w} {fi_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{fi_svg}</svg>'
-    st.markdown(svg_fi, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    fi_chart_html = (
+        '<div class="about-chart-container">'
+        '<div class="about-chart-title">What Drives Predictions? (Feature Importance)</div>'
+        '<div class="about-chart-caption">Base model (9 features). Higher = more influence on the prediction.</div>'
+        f'<svg viewBox="0 0 {fi_w} {fi_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%">{fi_svg}</svg>'
+        '</div>'
+    )
+    st.markdown(fi_chart_html, unsafe_allow_html=True)
 
     # ── Performance ──
     st.markdown(
