@@ -166,21 +166,38 @@ div[data-testid="stSelectbox"] > div > div {
 
 /* Factor cards */
 .factors-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.8rem; max-width: 700px; margin: 1.5rem auto;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem; max-width: 800px; margin: 1.5rem auto;
 }
 .factor-card {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px; padding: 1rem; text-align: left;
+    border-radius: 14px; padding: 1rem 0.8rem; text-align: center;
+    position: relative; overflow: hidden;
+}
+.factor-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.factor-card-raising::before { background: linear-gradient(90deg, #ff9800, #ff3b5c); }
+.factor-card-lowering::before { background: linear-gradient(90deg, #00e676, #69f0ae); }
+.factor-card-neutral::before { background: rgba(255,255,255,0.1); }
+.factor-icon {
+    font-size: 1.6rem; margin-bottom: 0.5rem; display: block;
 }
 .factor-name {
-    font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #888; margin-bottom: 0.3rem;
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #aaa; margin-bottom: 0.4rem;
 }
-.factor-value { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; }
+.factor-value { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; }
 .factor-raising { color: #ff6b6b; }
 .factor-lowering { color: #69f0ae; }
-.factor-neutral { color: #888; }
+.factor-neutral { color: #999; }
+.factor-direction {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; margin-top: 0.35rem;
+    letter-spacing: 0.05em;
+}
+.factor-dir-raising { color: #ff6b6b99; }
+.factor-dir-lowering { color: #69f0ae99; }
+.factor-dir-neutral { color: #66666699; }
 
 /* Animations */
 @keyframes pulseRed { 0%,100%{box-shadow:0 0 20px rgba(255,59,92,0.2)} 50%{box-shadow:0 0 40px rgba(255,59,92,0.4)} }
@@ -210,27 +227,33 @@ div[data-testid="stSelectbox"] > div > div {
 
 /* ── SENSITIVITY SECTION ── */
 .sensitivity-header {
-    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.3rem;
-    text-align: center; margin: 2.5rem 0 0.3rem 0; color: #e0e0e0;
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.6rem;
+    text-align: center; margin: 2.5rem 0 0.5rem 0; color: #fff;
 }
 .sensitivity-sub {
-    font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #666;
-    text-align: center; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #bbb;
+    text-align: center; margin-bottom: 1.5rem; max-width: 650px;
+    margin-left: auto; margin-right: auto; line-height: 1.6;
 }
 .threshold-card {
-    max-width: 500px; margin: 1.5rem auto; padding: 1.2rem 1.5rem;
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px; text-align: center;
+    max-width: 550px; margin: 1.5rem auto; padding: 1.5rem 2rem;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; text-align: center;
 }
 .threshold-label {
-    font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em;
-    text-transform: uppercase; color: #888; margin-bottom: 0.4rem;
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #bbb; margin-bottom: 0.5rem;
 }
 .threshold-value {
-    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2rem;
+    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2.2rem;
 }
-.threshold-note {
-    font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #666; margin-top: 0.3rem;
+.threshold-explainer {
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #e0e0e0;
+    margin-top: 0.6rem; line-height: 1.5;
+}
+.threshold-context {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #888;
+    margin-top: 0.5rem; font-style: italic;
 }
 
 /* ── COMMON ── */
@@ -375,9 +398,9 @@ def render_landing():
 
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("Start Prediction", type="primary", use_container_width=True):
+        def go_to_form():
             st.session_state.page = "form"
-            st.rerun()
+        st.button("Start Prediction", type="primary", use_container_width=True, on_click=go_to_form)
 
     m = config["base_model_metrics"]
     st.markdown(
@@ -473,27 +496,29 @@ def render_form():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    def go_back():
+        st.session_state.page = "landing"
+
+    def run_prediction():
+        inputs = {
+            "scandal_type": st.session_state.form_scandal_type,
+            "fandom_size_num": st.session_state.form_fandom_size,
+            "agency_tier": st.session_state.form_agency_tier,
+            "company_response": st.session_state.form_company_response,
+            "response_delay_days": st.session_state.form_response_delay,
+            "apology": st.session_state.form_apology,
+            "international": st.session_state.form_international,
+            "is_solo": st.session_state.form_is_solo,
+            "prior_scandal": st.session_state.form_prior_scandal,
+        }
+        st.session_state.prediction = predict_crisis(inputs)
+        st.session_state.page = "result"
+
     col_b1, col_b2, col_b3 = st.columns([2, 1, 2])
     with col_b1:
-        if st.button("← Back", type="secondary"):
-            st.session_state.page = "landing"
-            st.rerun()
+        st.button("← Back", type="secondary", on_click=go_back)
     with col_b3:
-        if st.button("Predict Outcome →", type="primary", use_container_width=True):
-            inputs = {
-                "scandal_type": st.session_state.form_scandal_type,
-                "fandom_size_num": st.session_state.form_fandom_size,
-                "agency_tier": st.session_state.form_agency_tier,
-                "company_response": st.session_state.form_company_response,
-                "response_delay_days": st.session_state.form_response_delay,
-                "apology": st.session_state.form_apology,
-                "international": st.session_state.form_international,
-                "is_solo": st.session_state.form_is_solo,
-                "prior_scandal": st.session_state.form_prior_scandal,
-            }
-            st.session_state.prediction = predict_crisis(inputs)
-            st.session_state.page = "result"
-            st.rerun()
+        st.button("Predict Outcome →", type="primary", use_container_width=True, on_click=run_prediction)
 
 
 def render_result():
@@ -557,13 +582,30 @@ def render_result():
 
     # ── Key factors ──
     if r["factors"]:
-        cards = "".join(
-            f'<div class="factor-card">'
-            f'<div class="factor-name">{name}</div>'
-            f'<div class="factor-value factor-{direction}">{value}</div>'
-            f'</div>'
-            for name, value, direction in r["factors"]
-        )
+        icon_map = {
+            "Fandom Size": ("👥", ),
+            "Response Delay": ("⏱️", ),
+            "Scandal Type": ("⚡", ),
+            "Company Response": ("🏢", ),
+            "Agency Tier": ("🏛️", ),
+        }
+        dir_labels = {
+            "raising": "↑ Increases risk",
+            "lowering": "↓ Lowers risk",
+            "neutral": "— Neutral",
+        }
+        cards = ""
+        for name, value, direction in r["factors"]:
+            icon = icon_map.get(name, ("📊",))[0]
+            dir_label = dir_labels.get(direction, "")
+            cards += (
+                f'<div class="factor-card factor-card-{direction}">'
+                f'<span class="factor-icon">{icon}</span>'
+                f'<div class="factor-name">{name}</div>'
+                f'<div class="factor-value factor-{direction}">{value}</div>'
+                f'<div class="factor-direction factor-dir-{direction}">{dir_label}</div>'
+                f'</div>'
+            )
         st.markdown(
             f'<div style="text-align:center;margin-top:1rem;"><div class="meter-label">Key Factors</div></div>'
             f'<div class="factors-grid">{cards}</div>',
@@ -576,8 +618,9 @@ def render_result():
     st.markdown('<div class="sensitivity-header">What If It Goes Viral?</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="sensitivity-sub">'
-        'The base prediction uses only pre-reaction features. '
-        'This curve shows how the crisis probability shifts as public reaction (Google Trends spike) intensifies.'
+        'The prediction above is based on 9 structural features — things you know when the scandal breaks. '
+        'But how much the public actually reacts (measured as a Google Trends spike) can shift the outcome. '
+        'The curve below sweeps that reaction from minimal to maximum and shows where the crisis probability lands.'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -692,19 +735,23 @@ def render_result():
     if isinstance(threshold, (int, float)):
         color = "#ff6b9d"
         spike_stats = config["reaction_spike_stats"]
-        context = ""
         if threshold < spike_stats["median"]:
-            context = "Below the dataset median — this scandal is structurally fragile regardless of virality"
+            context = f"The median spike in the dataset is {spike_stats['median']:.1f} — this threshold is below it, meaning even a modest public reaction could escalate things."
         elif threshold > spike_stats["mean"] + spike_stats["std"]:
-            context = "Well above average — it would take an unusually viral moment to push this into crisis"
+            context = f"The average spike is {spike_stats['mean']:.1f}. This threshold is well above that — only an unusually viral moment would push this into crisis territory."
         else:
-            context = "Near the typical range — public reaction could tip this either way"
+            context = f"The average spike is {spike_stats['mean']:.1f}. This threshold is in a realistic range — public reaction could realistically tip this either way."
 
         st.markdown(
             f"""<div class="threshold-card">
                 <div class="threshold-label">Critical Tipping Point</div>
                 <div class="threshold-value" style="color: {color}">Spike ≥ {threshold:.1f}</div>
-                <div class="threshold-note">{context}</div>
+                <div class="threshold-explainer">
+                    If the Google Trends reaction spike reaches <strong>{threshold:.1f}</strong> or higher,
+                    the model flips from <span style="color:#69f0ae">Manageable</span>
+                    to <span style="color:#ff3b5c">High Crisis</span>.
+                </div>
+                <div class="threshold-context">{context}</div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -712,8 +759,12 @@ def render_result():
         st.markdown(
             """<div class="threshold-card">
                 <div class="threshold-label">Critical Tipping Point</div>
-                <div class="threshold-value" style="color: #ff3b5c">Always High Crisis</div>
-                <div class="threshold-note">The structural factors alone push this past 50% — public reaction barely matters</div>
+                <div class="threshold-value" style="color: #ff3b5c">No Tipping Point</div>
+                <div class="threshold-explainer">
+                    The structural factors alone (scandal type, fandom size, agency response) already
+                    put this above 50% crisis probability. Public reaction doesn't change the outcome —
+                    this is a <span style="color:#ff3b5c">High Crisis</span> regardless of virality.
+                </div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -722,7 +773,11 @@ def render_result():
             """<div class="threshold-card">
                 <div class="threshold-label">Critical Tipping Point</div>
                 <div class="threshold-value" style="color: #69f0ae">Resilient</div>
-                <div class="threshold-note">Even maximum virality doesn't push this scenario past 50% — structural factors are too protective</div>
+                <div class="threshold-explainer">
+                    Even at maximum virality, this scenario stays below 50% crisis probability.
+                    The protective factors (large fandom, strong agency, scandal type) are strong enough
+                    that public reaction alone can't push this into <span style="color:#ff3b5c">High Crisis</span>.
+                </div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -731,10 +786,10 @@ def render_result():
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("Try Another Scenario", type="primary", use_container_width=True):
+        def try_again():
             st.session_state.prediction = None
             st.session_state.page = "form"
-            st.rerun()
+        st.button("Try Another Scenario", type="primary", use_container_width=True, on_click=try_again)
 
     # ── Disclaimer ──
     m_base = config["base_model_metrics"]
