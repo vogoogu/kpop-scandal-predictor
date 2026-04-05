@@ -1162,14 +1162,6 @@ def render_about():
             unsafe_allow_html=True,
         )
 
-    st.markdown(
-        '<div class="about-text" style="margin-top:0.5rem;">'
-        '<strong>Note on imputation:</strong> For 40 of the 103 entries, the Google Trends API returned insufficient data '
-        'to calculate a reliable spike. These values were imputed from the other 9 features using a regression model. '
-        'This is disclosed throughout the app and acknowledged as a limitation.'
-        '</div>',
-        unsafe_allow_html=True,
-    )
 
     # ════════════════════════════════════════════════════════════
     # SECTION 3: THE MODEL
@@ -1336,10 +1328,6 @@ def render_about():
          "In 5-fold cross-validation, each test fold contains roughly 7 high-crisis examples. "
          "A single misclassification swings the fold-level F1 by 10–15 percentage points. "
          "Performance estimates carry substantial uncertainty."),
-        ("Imputed reaction spike",
-         "40 of 103 reaction_spike values were imputed from other features because the Google Trends API "
-         "returned insufficient data. This is the strongest individual predictor (19% importance in the full model). "
-         "If the imputation process had any indirect correlation with the target, this would inflate performance."),
         ("Confounded features",
          "Fandom size and agency tier are highly correlated (r=0.62) — mega fandoms almost exclusively belong to "
          "Big 3/4 agencies. The model cannot fully disentangle whether outcomes improve because of fan loyalty "
