@@ -316,7 +316,7 @@ div[data-testid="stSelectbox"] > div > div {
     margin-top: 2rem;
 }
 .site-logo-bar img {
-    height: 36px;
+    height: 100px;
     width: auto;
     opacity: 0.5;
     filter: brightness(0) invert(1);
