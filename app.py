@@ -570,7 +570,7 @@ def render_result():
 # ── Animation overlays ──
     if is_high:
         st.markdown('<div class="warning-overlay"></div>', unsafe_allow_html=True)
-        symbols = ["⚠️", "💀", "🚨", "❌", "⛔"]
+        symbols = ["⚠️", "💀", "❌"]
         particles = "".join(
             f'<div class="danger-particle" style="'
             f'left:{np.random.randint(0,100)}%;'
