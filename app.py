@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import json
 import base64
+import anthropic
 
 # ─────────────────────────────────────────────────────────────
 # CONFIG
@@ -301,6 +302,21 @@ div[data-testid="stSelectbox"] > div > div {
     margin-top: 0.5rem; font-style: italic;
 }
 
+/* ── AI REASONING ── */
+.reasoning-container {
+    max-width: 550px; margin: 0 auto 1.5rem auto; padding: 1rem 1.5rem;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; text-align: center;
+}
+.reasoning-label {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #c850ff; margin-bottom: 0.4rem;
+}
+.reasoning-text {
+    font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #e0e0e0;
+    line-height: 1.6; font-style: italic;
+}
+
 /* ── ABOUT PAGE ── */
 .about-container { max-width: 850px; margin: 0 auto; padding: 0 1rem; }
 .about-title {
@@ -474,6 +490,48 @@ def build_full_vector(inputs: dict, spike: float) -> pd.DataFrame:
     return row_encoded[feature_names]
 
 
+def generate_reasoning(inputs: dict, prob: float, pred: str) -> str:
+    """Call Claude API to generate a 1-2 sentence explanation of the prediction."""
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            return ""
+
+        client = anthropic.Anthropic(api_key=api_key)
+
+        scandal_type = inputs["scandal_type"]
+        fandom = {2: "medium", 3: "large", 4: "mega"}.get(inputs["fandom_size_num"], "unknown")
+        agency = {1: "small/indie", 2: "mid-tier", 3: "Big3/Big4"}.get(inputs["agency_tier"], "unknown")
+        response = {0: "silence", 1: "partial statement", 2: "strong defense"}.get(inputs["company_response"], "unknown")
+        delay = inputs["response_delay_days"]
+        apology = "yes" if inputs["apology"] else "no"
+        intl = "yes" if inputs["international"] else "no"
+        solo = "solo artist" if inputs["is_solo"] else "group member"
+        prior = "yes" if inputs["prior_scandal"] else "no"
+
+        prompt = (
+            f"You are analyzing a K-pop scandal prediction. A Random Forest model predicted this scandal "
+            f"has a {prob*100:.0f}% probability of being a HIGH CRISIS (career-ending) vs manageable.\n\n"
+            f"Scenario: {scandal_type} scandal, {fandom} fandom, {agency} agency, "
+            f"company responded with {response} after {delay} day(s), "
+            f"apology issued: {apology}, international attention: {intl}, "
+            f"artist is a {solo}, prior scandal: {prior}.\n\n"
+            f"Write exactly 1-2 sentences explaining WHY this scandal is predicted as "
+            f"{'HIGH CRISIS' if pred == 'high' else 'MANAGEABLE'}. "
+            f"Be specific about which factors matter most. No hedging, no disclaimers. "
+            f"Write as a confident analyst."
+        )
+
+        msg = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=150,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return msg.content[0].text.strip()
+    except Exception:
+        return ""
+
+
 def predict_crisis(inputs: dict) -> dict:
     X_base = build_base_vector(inputs)
     base_prob = model_base.predict_proba(X_base)[0][1]
@@ -532,6 +590,9 @@ def predict_crisis(inputs: dict) -> dict:
             direction = "raising" if val == 1 else ("lowering" if val == 3 else "neutral")
             factors.append(("Agency Tier", tier_labels.get(int(val), str(val)), direction))
 
+    # ── AI reasoning ──
+    reasoning = generate_reasoning(inputs, base_prob, base_pred)
+
     return {
         "base_prob": base_prob,
         "base_pred": base_pred,
@@ -539,6 +600,7 @@ def predict_crisis(inputs: dict) -> dict:
         "spike_range": spike_range.tolist(),
         "spike_probs": spike_probs.tolist(),
         "threshold": threshold,
+        "reasoning": reasoning,
     }
 
 
@@ -764,6 +826,17 @@ def render_result():
         </div>""",
         unsafe_allow_html=True,
     )
+
+    # ── AI Reasoning ──
+    reasoning = r.get("reasoning", "")
+    if reasoning:
+        st.markdown(
+            f"""<div class="reasoning-container">
+                <div class="reasoning-label">AI Analysis (Claude)</div>
+                <div class="reasoning-text">{reasoning}</div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
 
     # ── Key factors ──
     if r["factors"]:
