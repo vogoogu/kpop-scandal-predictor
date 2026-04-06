@@ -176,10 +176,11 @@ div[data-testid="stSelectbox"] > div > div {
 
 /* Factor cards */
 .factors-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 0.8rem; max-width: 800px; margin: 1.5rem auto;
+    display: flex; flex-wrap: nowrap;
+    gap: 0.8rem; max-width: 900px; margin: 1.5rem auto;
 }
 .factor-card {
+    flex: 1; min-width: 0;
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
     border-radius: 14px; padding: 1rem 0.8rem; text-align: center;
     position: relative; overflow: hidden;
@@ -304,17 +305,17 @@ div[data-testid="stSelectbox"] > div > div {
 
 /* ── AI REASONING ── */
 .reasoning-container {
-    max-width: 550px; margin: 0 auto 1.5rem auto; padding: 1rem 1.5rem;
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px; text-align: center;
+    max-width: 500px; margin: 0 auto 1.5rem auto; padding: 0.6rem 1.2rem;
+    background: rgba(200,80,255,0.04); border: 1px solid rgba(200,80,255,0.12);
+    border-radius: 100px;
 }
 .reasoning-label {
-    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em;
-    text-transform: uppercase; color: #c850ff; margin-bottom: 0.4rem;
+    font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #c850ff; display: inline; margin-right: 0.5rem;
 }
 .reasoning-text {
-    font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #e0e0e0;
-    line-height: 1.6; font-style: italic;
+    font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #e0e0e0;
+    display: inline;
 }
 
 /* ── ABOUT PAGE ── */
@@ -491,7 +492,7 @@ def build_full_vector(inputs: dict, spike: float) -> pd.DataFrame:
 
 
 def generate_reasoning(inputs: dict, prob: float, pred: str) -> str:
-    """Call Claude API to generate a 1-2 sentence explanation of the prediction."""
+    """Call Claude API to generate a short analyst verdict."""
     try:
         api_key = st.secrets.get("ANTHROPIC_API_KEY", "")
         if not api_key:
@@ -510,21 +511,17 @@ def generate_reasoning(inputs: dict, prob: float, pred: str) -> str:
         prior = "yes" if inputs["prior_scandal"] else "no"
 
         prompt = (
-            f"You are analyzing a K-pop scandal prediction. A Random Forest model predicted this scandal "
-            f"has a {prob*100:.0f}% probability of being a HIGH CRISIS (career-ending) vs manageable.\n\n"
-            f"Scenario: {scandal_type} scandal, {fandom} fandom, {agency} agency, "
-            f"company responded with {response} after {delay} day(s), "
-            f"apology issued: {apology}, international attention: {intl}, "
-            f"artist is a {solo}, prior scandal: {prior}.\n\n"
-            f"Write exactly 1-2 sentences explaining WHY this scandal is predicted as "
-            f"{'HIGH CRISIS' if pred == 'high' else 'MANAGEABLE'}. "
-            f"Be specific about which factors matter most. No hedging, no disclaimers. "
-            f"Write as a confident analyst."
+            f"K-pop scandal: {scandal_type}, {fandom} fandom, {agency} agency, "
+            f"response: {response} after {delay}d, apology: {apology}, "
+            f"international: {intl}, {solo}, prior scandal: {prior}. "
+            f"Model says {prob*100:.0f}% crisis probability → {'HIGH CRISIS' if pred == 'high' else 'MANAGEABLE'}.\n\n"
+            f"Write ONE short sentence (max 15 words) — a sharp analyst verdict on why. "
+            f"Don't list factors. Give the single key insight or pattern. No filler words."
         )
 
         msg = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=150,
+            max_tokens=60,
             messages=[{"role": "user", "content": prompt}],
         )
         return msg.content[0].text.strip()
@@ -832,8 +829,8 @@ def render_result():
     if reasoning:
         st.markdown(
             f"""<div class="reasoning-container">
-                <div class="reasoning-label">AI Analysis (Claude)</div>
-                <div class="reasoning-text">{reasoning}</div>
+                <span class="reasoning-label">AI</span>
+                <span class="reasoning-text">{reasoning}</span>
             </div>""",
             unsafe_allow_html=True,
         )
