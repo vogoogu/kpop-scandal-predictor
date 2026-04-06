@@ -479,7 +479,7 @@ def predict_crisis(inputs: dict) -> dict:
     base_prob = model_base.predict_proba(X_base)[0][1]
     base_pred = "high" if base_prob > 0.5 else "manageable"
 
-    spike_range = np.linspace(-6, 14, 81)
+    spike_range = np.linspace(-6, 14, 41)
     spike_probs = []
     for s in spike_range:
         X_full = build_full_vector(inputs, s)
@@ -875,35 +875,19 @@ def render_result():
         f'font-family="Space Mono, monospace" font-size="10">Reaction Spike (Google Trends)</text>'
     )
 
-    svg = f"""<svg viewBox="0 0 {chart_w} {chart_h}" xmlns="http://www.w3.org/2000/svg"
-        style="width:100%;max-width:650px;margin:0 auto;display:block;">
-        <defs>
-            <linearGradient id="curveGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#69f0ae"/>
-                <stop offset="40%" stop-color="#ffd54f"/>
-                <stop offset="70%" stop-color="#ff9800"/>
-                <stop offset="100%" stop-color="#ff3b5c"/>
-            </linearGradient>
-            <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="url(#curveGrad)" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="url(#curveGrad)" stop-opacity="0.02"/>
-            </linearGradient>
-        </defs>
+    svg = f"""<svg viewBox="0 0 {chart_w} {chart_h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;margin:0 auto;display:block;">
         {y_labels}
         {x_labels}
         {x_title}
-        <line x1="{pad_l}" y1="{y50:.1f}" x2="{pad_l + plot_w}" y2="{y50:.1f}"
-            stroke="#ff6b9d" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
-        <text x="{pad_l + plot_w + 4}" y="{y50 + 3}" fill="#ff6b9d" opacity="0.6"
-            font-family="Space Mono, monospace" font-size="9">50%</text>
-        <polygon points="{fill_points}" fill="url(#fillGrad)"/>
-        <polyline points="{points}" fill="none" stroke="url(#curveGrad)" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="{pad_l}" y1="{y50:.1f}" x2="{pad_l + plot_w}" y2="{y50:.1f}" stroke="#ff6b9d" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
+        <text x="{pad_l + plot_w + 4}" y="{y50 + 3}" fill="#ff6b9d" opacity="0.6" font-family="Space Mono, monospace" font-size="9">50%</text>
+        <polygon points="{fill_points}" fill="#ff6b9d" opacity="0.07"/>
+        <polyline points="{points}" fill="none" stroke="#ff6b9d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         {threshold_marker}
         {threshold_text_svg}
     </svg>"""
 
-    st.markdown(f'<div>{svg}</div>', unsafe_allow_html=True)
+    st.markdown(svg, unsafe_allow_html=True)
 
     # ── Threshold card ──
     if isinstance(threshold, (int, float)):
@@ -1281,9 +1265,7 @@ def render_about():
     max_imp = imp_sorted[0][1] if imp_sorted else 1
 
     fi_w, fi_h = 700, 30 * len(imp_sorted) + 20
-    fi_svg = '<defs><linearGradient id="impGrad" x1="0" y1="0" x2="1" y2="0">'
-    fi_svg += '<stop offset="0%" stop-color="#c850ff"/><stop offset="100%" stop-color="#ff6b9d"/>'
-    fi_svg += '</linearGradient></defs>'
+    fi_svg = ""
 
     for i, (feat, imp) in enumerate(imp_sorted):
         y_pos = 10 + i * 30
@@ -1293,7 +1275,7 @@ def render_about():
         pct = imp * 100
 
         fi_svg += f'<text x="170" y="{y_pos + 15}" text-anchor="end" fill="#bbb" font-family="Outfit, sans-serif" font-size="11">{label}</text>'
-        fi_svg += f'<rect x="180" y="{y_pos + 3}" width="{bar_width:.1f}" height="18" rx="4" fill="url(#impGrad)" opacity="0.8"/>'
+        fi_svg += f'<rect x="180" y="{y_pos + 3}" width="{bar_width:.1f}" height="18" rx="4" fill="#c850ff" opacity="0.6"/>'
         fi_svg += f'<text x="{185 + bar_width:.1f}" y="{y_pos + 16}" fill="#ff6b9d" font-family="Space Mono, monospace" font-size="10">{pct:.1f}%</text>'
 
     fi_chart_html = (
@@ -1348,7 +1330,7 @@ def render_about():
          "Big 3/4 agencies. The model cannot fully disentangle whether outcomes improve because of fan loyalty "
          "or because powerful agencies have better crisis management infrastructure."),
         ("Zero-frequency categories",
-         "Two scandal types — behavior (1/12) and political (1/5) — produced only one high-crisis case each. "
+         "Two scandal types — behavior (0/11) and political (0/4) — produced zero high-crisis cases in the dataset. "
          "The model may be overconfident that these categories are always safe. The sample is simply too small to conclude "
          "that behavior or political scandals never escalate."),
         ("Temporal leakage risk",
