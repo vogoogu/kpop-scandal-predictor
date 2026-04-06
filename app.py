@@ -1348,7 +1348,7 @@ def render_about():
          "Big 3/4 agencies. The model cannot fully disentangle whether outcomes improve because of fan loyalty "
          "or because powerful agencies have better crisis management infrastructure."),
         ("Zero-frequency categories",
-         "Two scandal types — behavior (0/11) and political (0/4) — produced zero high-crisis cases in the dataset. "
+         "Two scandal types — behavior (1/12) and political (1/5) — produced only one high-crisis case each. "
          "The model may be overconfident that these categories are always safe. The sample is simply too small to conclude "
          "that behavior or political scandals never escalate."),
         ("Temporal leakage risk",
