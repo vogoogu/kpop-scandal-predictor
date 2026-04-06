@@ -957,7 +957,11 @@ def render_result():
         {threshold_text_svg}
     </svg>"""
 
-    st.markdown(svg, unsafe_allow_html=True)
+    svg_b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+    st.markdown(
+        f'<img src="data:image/svg+xml;base64,{svg_b64}" style="width:100%;max-width:650px;display:block;margin:0 auto;">',
+        unsafe_allow_html=True,
+    )
 
     # ── Threshold card ──
     if isinstance(threshold, (int, float)):
