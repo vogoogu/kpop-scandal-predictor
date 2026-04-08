@@ -6,8 +6,8 @@ Live Demo
 Model
 
 Algorithm: Random Forest (200 trees, balanced class weights)
-Dataset: 103 real K-pop scandals from 2006–2024
-Performance: 83.5% accuracy, F1=0.75 on minority class (high crisis), AUC=0.87
+Dataset: 105 real K-pop scandals from 2006–2024
+Performance: 82.9% accuracy, F1=0.73 on minority class (high crisis), AUC=0.89
 Baseline: A model that always guesses "manageable" gets 66% — ours beats that by 17.5 points
 
 Top Predictive Features
