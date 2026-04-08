@@ -10,11 +10,16 @@ Dataset: 105 real K-pop scandals from 2006–2024
 Performance: 82.9% accuracy, F1=0.73 on minority class (high crisis), AUC=0.89
 Baseline: A model that always guesses "manageable" gets 66% — ours beats that by 17.5 points
 
-Top Predictive Features
-FeatureImportancePublic reaction spike (Google Trends)19.0%Fandom size15.4%Response delay (days)12.1%Criminal scandal type9.3%Company response strength9.0%
-Limitations
+**Top Predictive Features**
+Feature Importance 
+Fandom size 17.4%
+Response delay (days) 15.1%
+Company response strength 11.2%
+Criminal scandal type 10.4%
+**
+Limitations**
 
-Small dataset (103 cases, 35 "high crisis") — performance estimates have high variance
+Small dataset (105 cases, 37 "high crisis") — performance estimates have high variance
 40% of reaction_spike values were imputed from other features
 fandom_size and agency_tier are highly correlated (r=0.62) — the model can't fully disentangle them
 Two scandal types (behavior, political) had zero "high" cases in training — the model may be overconfident about these
